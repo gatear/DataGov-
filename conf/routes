@@ -12,3 +12,7 @@ GET     /message                    controllers.AsyncController.message
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
 GET     /crime/type/percentage           controllers.Application.listCrimeTypeDistribution
+
+GET     /location/:long/:lat     controllers.Application.checkArea(long : String, lat: String)
+
+GET     /crime/year/deviation   controllers.Application.getCrimeDeviation
