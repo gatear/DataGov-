@@ -2,13 +2,9 @@ package services.postgres
 
 import javax.inject.{Inject, Singleton}
 
-import com.github.mauricio.async.db.Configuration
 import com.github.mauricio.async.db.pool.{ConnectionPool, PoolConfiguration}
 import com.github.mauricio.async.db.postgresql.pool.PostgreSQLConnectionFactory
 import com.github.mauricio.async.db.postgresql.util.URLParser
-import play.api.inject.ApplicationLifecycle
-
-import scala.concurrent.Future
 
 @Singleton
 class DatabaseConnection {

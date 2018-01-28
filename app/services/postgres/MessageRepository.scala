@@ -5,13 +5,8 @@ import com.github.mauricio.async.db.{Connection, QueryResult, ResultSet, RowData
 import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 
-
-
-
 class MessageRepository(pool :Connection) {
 import MessageRepository._
-
-
 
   def listDistribution ():Future[IndexedSeq[Seq[String]]] = {
 
@@ -26,10 +21,9 @@ import MessageRepository._
   }
 
   import models.Location
-  def checkLocation (location: Location): Future[IndexedSeq[(String, String)]] ={
+  def checkLocation[L >: Location] (location: L) = {
 
-
-    val futureResult : Future[QueryResult] = pool.sendQuery(SelectCrimesNearLocation.replace("$1",location.toString))
+    val futureResult  = pool.sendQuery(SelectCrimesNearLocation.replace("$1",location.toString))
     val result = futureResult.map( qResult => qResult.rows match { case Some(resultSet: ResultSet) => resultSet.collect{case row =>row("Primary Type").toString -> row("description").toString}})
 
     result
@@ -37,7 +31,7 @@ import MessageRepository._
 
   def selectCrimeDev () = {
     val futureResult : Future[QueryResult] = pool.sendQuery(SelectCrimeDev)
-    val result = futureResult.map( qResult => qResult.rows match { case Some(resultSet: ResultSet) => resultSet.collect{case row =>row("year").toString -> row("deviation").toString}})
+    val result =  pool.sendQuery(SelectCrimeDev).map( qResult => qResult.rows match { case Some(resultSet: ResultSet) => resultSet.collect{case row =>row("year").toString -> row("deviation").toString}})
 
     result
   }
