@@ -3,7 +3,7 @@ package controllers
 import javax.inject.{Inject, Singleton}
 
 import play.api.libs.json.{JsArray, JsObject, JsString}
-import play.api.mvc.{AbstractController, ControllerComponents}
+import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
 import services.postgres.DatabaseConnection
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -20,15 +20,15 @@ class Application @Inject()(cc: ControllerComponents)(postgres: DatabaseConnecti
 
     dbOps.selectDistribution  .map(set => set.collect{ case IndexedSeq(t, p, _*) =>(t-> p) }.filter(_._2.toFloat > 2) )
                               .map(seq => seq.collect{ case Tuple2(t, p) => JsObject(Seq( ("Type"-> JsString(t)), ("Percentage"->JsString(p)) ) )} )
-                              .map( (jsObjects) => Ok(JsArray( jsObjects) ))
+                              .flatMap( (jsObjects) => Future{ Ok(JsArray( jsObjects) ) })
   }
   def checkArea(long: String, lat: String) = Action.async {
     import models.Location
 
     val location = Location(long, lat)
-    dbOps.checkLocation(location)
-         .map((set: IndexedSeq[(String, String)]) => set.collect{ case Tuple2(t ,d) => JsObject(Seq (("Crime"->JsString(t)), ("Description" ->JsString(d)))) })
-         .flatMap(jsObjects => Future { Ok(JsArray(jsObjects)) } )
+    dbOps .checkLocation(location)
+          .map((set) => set.collect{ case Tuple5(t , locDesc, desc, date, id) => JsObject(Seq (("Crime"->JsString(t)), ("Description" ->JsString(desc)), ("LocationDescription"->JsString(locDesc)), ("Date"->JsString(date)),("ID"->JsString(id))) )})
+          .flatMap(jsObjects => Future { Ok(JsArray(jsObjects)) } )
 
   }
   def getCrimeDeviation() = Action.async{

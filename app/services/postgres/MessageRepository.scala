@@ -24,7 +24,11 @@ import MessageRepository._
   def checkLocation[L >: Location] (location: L) = {
 
     val futureResult  = pool.sendQuery(SelectCrimesNearLocation.replace("$1",location.toString))
-    val result = futureResult.map( qResult => qResult.rows match { case Some(resultSet: ResultSet) => resultSet.collect{case row =>row("Primary Type").toString -> row("description").toString}})
+    val result = futureResult.map( qResult => qResult.rows match { case Some(resultSet: ResultSet) => resultSet.collect{case row => (row("Primary Type").toString,
+                                                                                                                                     row("Location Description").toString,
+                                                                                                                                     row("description").toString,
+                                                                                                                                     row("date").toString,
+                                                                                                                                     row("id").toString) }})
 
     result
   }
@@ -44,7 +48,7 @@ import MessageRepository._
   }
 }
 object MessageRepository {
-  val SelectCrimesNearLocation = "SELECT \"Primary Type\",\"description\"\nFROM crimes_2001_to_2017_chicago\nWHERE ST_DWithin( geom::geography , st_geomfromtext($1)::geography , 50)  = TRUE ;"
+  val SelectCrimesNearLocation = "SELECT \"id\",\"Primary Type\",\"description\",\"date\"::DATE, \"Location Description\"\nFROM crimes_2001_to_2017_chicago\nWHERE ST_DWithin( geom::geography , st_geomfromtext($1)::geography , 100)  = TRUE LIMIT 40"
 
   val SelectCrimeDistribution = "(SELECT crimes.type, ROUND( ((CAST(crimes.cases AS NUMERIC) * 100)/ (SELECT COUNT(*) FROM crimes_2001_to_2017_chicago) ),4)  AS Percentage FROM " +
     "(SELECT DISTINCT  crimes_2001_to_2017_chicago.\"Primary Type\" AS type, COUNT(crimes_2001_to_2017_chicago.\"Primary Type\") AS Cases " +
