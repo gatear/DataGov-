@@ -16,3 +16,5 @@ GET     /crime/type/percentage           controllers.Application.listCrimeTypeDi
 GET     /location/:long/:lat     controllers.Application.checkArea(long : String, lat: String)
 
 GET     /crime/year/deviation   controllers.Application.getCrimeDeviation
+
+GET     /spark/pi               controllers.SparkController.estimatePi()

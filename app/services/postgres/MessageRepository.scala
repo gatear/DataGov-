@@ -50,7 +50,8 @@ import MessageRepository._
 object MessageRepository {
   val SelectCrimesNearLocation = "SELECT \"id\",\"Primary Type\",\"description\",\"date\"::DATE, \"Location Description\"\nFROM crimes_2001_to_2017_chicago\nWHERE ST_DWithin( geom::geography , st_geomfromtext($1)::geography , 100)  = TRUE LIMIT 40"
 
-  val SelectCrimeDistribution = "(SELECT crimes.type, ROUND( ((CAST(crimes.cases AS NUMERIC) * 100)/ (SELECT COUNT(*) FROM crimes_2001_to_2017_chicago) ),4)  AS Percentage FROM " +
+  val SelectCrimeDistribution =
+    "(SELECT crimes.type, ROUND( ((CAST(crimes.cases AS NUMERIC) * 100)/ (SELECT COUNT(*) FROM crimes_2001_to_2017_chicago) ),4)  AS Percentage FROM " +
     "(SELECT DISTINCT  crimes_2001_to_2017_chicago.\"Primary Type\" AS type, COUNT(crimes_2001_to_2017_chicago.\"Primary Type\") AS Cases " +
     "FROM crimes_2001_to_2017_chicago " +
     "GROUP BY crimes_2001_to_2017_chicago.\"Primary Type\") AS  crimes) " +
