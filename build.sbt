@@ -27,8 +27,7 @@ resolvers ++= Seq(
 
 scalaVersion := "2.11.8"
 
-libraryDependencies ++= Seq( guice,
-                             "com.github.mauricio" %% "postgresql-async" % "0.2.21",
-                             "org.apache.spark" %% "spark-core" % "2.2.1" ,
-                             "org.apache.spark" %% "spark-mllib" % "2.2.1" )
+libraryDependencies ++= Seq(guice,
+  "com.github.mauricio" %% "postgresql-async" % "0.2.21",
+  "com.tsukaby" %% "naive-bayes-classifier-scala" % "0.2.0")
 

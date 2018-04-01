@@ -1,6 +1,8 @@
 import com.google.inject.AbstractModule
 import java.time.Clock
 
+import bayes.Classifier
+import play.api.Logger
 
 /**
  * This class is a Guice module that tells Guice how to bind several
@@ -15,6 +17,10 @@ import java.time.Clock
 class Module extends AbstractModule {
 
   override def configure() = {
+
+    Logger.info("Binding bayes classifier ...")
+    bind(classOf[Classifier]).asEagerSingleton()
+
     // Use the system clock as the default implementation of Clock
     bind(classOf[Clock]).toInstance(Clock.systemDefaultZone)
 

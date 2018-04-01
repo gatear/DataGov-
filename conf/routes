@@ -5,16 +5,23 @@
 # An example controller showing a sample home page
 GET     /                           controllers.HomeController.index
 
-# An example controller showing how to write asynchronous code
-GET     /message                    controllers.AsyncController.message
-
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+GET     /assets/*file               controllers.Assets.versioned(file)
 
-GET     /crime/type/percentage           controllers.Application.listCrimeTypeDistribution
+GET     /crime/type/percentage      controllers.Application.listCrimeTypeDistribution
 
-GET     /location/:long/:lat     controllers.Application.checkArea(long : String, lat: String)
+GET     /location/:long/:lat        controllers.Application.checkArea(long : String, lat: String)
 
-GET     /crime/year/deviation   controllers.Application.getCrimeDeviation
+GET     /crime/year/deviation       controllers.Application.getCrimeDeviation
 
-GET     /spark/pi               controllers.SparkController.estimatePi()
+GET     /ws                         controllers.Application.socket
+
+GET     /ws/cluster                 controllers.Application.clusterService
+
+GET    /bayes/:text                 controllers.Application.predict( text :String)
+
+##### Used for overview section
+
+GET /overview/pie-charts             controllers.Application.setPieCharts
+
+GET /overview/line-charts/limit=:limit            controllers.Application.setLineCharts(limit : Int)
