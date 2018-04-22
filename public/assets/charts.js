@@ -1,100 +1,126 @@
-$('document').ready(function() {
+(function (){
+
+    var routes = jsRoutes.controllers.Application;
 
 
-    var ctxCrimeDev = $("#crimeDev")[0].getContext('2d');
-    var ctxCrimeType = $("#crimeType")[0].getContext('2d');
-      $.get('crime/year/deviation',function () { }).done(function (data) {
-          var types = new Array();
-          var percentages= new Array();
+    var arrests = document.querySelector('#arrests').getContext('2d');
+    var domestics = document.querySelector('#domestics').getContext('2d');
+    var topCrimes = document.querySelector('#top-crimes').getContext('2d');
 
-          console.log(data);
-          for(i=0; i < data.length; i++){
-              types.push(data[i].Year);
-              percentages.push(data[i].Percentage);
-          }
 
-          var lineChart = new Chart(ctxCrimeDev, {
-              type: 'line',
-              data: {
-                  labels: types,
-                  datasets: [{
-                      label: '%',
-                      backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                      borderColor: 'rgba(255,99,132,1)',
-                      data: percentages,
-                      fill : true
-                  }]
-              },
-              options: {
-                  title : {display: true,
-                      text:'Crime Percentage Deviation'},
-                  onResize : function () { console.log("resized .. "); },
-                  scales: {
-                      yAxes: [{
-                          ticks: {
-                              beginAtZero: true
-                          }
-                      }]
-                  }
-              }
-          });
-      });
-      $.get('crime/type/percentage', function() { }).done(function (data) {
-        var types = new Array();
-        var percentages= new Array();
+    var chartOptions = {
+        legend: {
+            display: true,
+            position: 'bottom'
+        },
 
-        console.log(data);
-        for(i=0; i < data.length; i++){
-            types.push(data[i].Type);
-            percentages.push(data[i].Percentage);
-        }
+    };
 
-          var lineChart = new Chart(ctxCrimeType, {
-              type: 'bar',
-              data: {
-                  labels: types,
-                  datasets: [{
-                      label: '%',
-                      data: percentages,
-                  backgroundColor: [
-                      'rgba(255, 99, 132, 0.8)',
-                      'rgba(255, 99, 132, 0.7)',
-                      'rgba(255, 99, 132, 0.6)',
-                      'rgba(255, 99, 132, 0.5)',
-                      'rgba(255, 99, 132, 0.4)',
-                      'rgba(255, 99, 132, 0.3)',
-                      'rgba(255, 99, 132, 0.2)',
-                      'rgba(255, 99, 132, 0.1)',
-                      'rgba(255, 99, 132, 0.1)',
-                      'rgba(255, 99, 132, 0.05)'
-                  ],
-                  borderColor: [
-                      'rgba(255,99,132,1)',
-                      'rgba(255,99,132,0.95)',
-                      'rgba(255,99,132,0.9)',
-                      'rgba(255,99,132,0.85)',
-                      'rgba(255,99,1320.8)',
-                      'rgba(255,99,132,0.75)',
-                      'rgba(255,99,132,0.7)',
-                      'rgba(255,99,132,0.65)',
-                      'rgba(255,99,132,0.6)',
-                      'rgba(255,99,132,0.55)',
-                  ],
-                  borderWidth: 1
-                  }]
-              },
-              options: {
-                  title : {display: true },
-                  onResize : function () { console.log("resized .. "); },
-                  scales: {
-                      yAxes: [{
-                          ticks: {
-                              beginAtZero: true
-                          }
-                      }]
-                  }
-              }
-          });
+    $.get( routes.setPieChart().url, function () { }).done( function(data){
+
+        //Arrests pie-chart
+        new Chart( arrests, {
+            type:'pie',
+            responsive: true,
+            data: {
+                datasets: [{
+                    label: 'From 2001-2017',
+
+
+                    data : [
+                        ((data.arrests / data.crimes) * 100).toFixed(2),
+                        ((data.crimes  - data.arrests)/ data.crimes * 100).toFixed(2)
+                        ],
+                    backgroundColor : [ '#E20074','#4c516d'],
+                }],
+
+                labels:[
+                    'With Arrest [%]',
+                    'Without Arrest [%]'
+                ]
+            },
+            options: chartOptions
+        });
+
+        //Domestic pie-chart
+        new Chart( domestics, {
+            type:'pie',
+            responsive: true,
+            data: {
+                datasets: [{
+                    label: 'From 2001-2017',
+
+                    data : [
+                        ((data.domestics / data.crimes) * 100).toFixed(2),
+                        ((data.crimes  - data.domestics)/ data.crimes * 100).toFixed(2)
+                    ],
+
+                    backgroundColor : [ '#E20074','#4c516d']
+
+                }],
+
+                labels:[
+                    'Domestics Crimes [%]',
+                    'Other Types [%]'
+                ]
+            },
+            options: chartOptions
+        });
+
     });
 
-});
+    //The argument is the limit of incidents
+    $.get( routes.setLineChart( 500000 ).url, function () { }).done( function(data){
+
+        let colors = ['red','blue','purple','red','orange'];
+
+        let response = data.timeseries.map( object => ({ data:  object.data.map(tuple => tuple.count),
+                                                         label: object.type,
+                                                         borderColor: colors.pop(),
+                                                         fill : false,
+                                                         pointRadius: 6,
+                                                         pointHoverRadius: 7,}) );
+
+        console.log(response);
+
+        new Chart( topCrimes, {
+            type: 'line',
+
+            responsive: true,
+
+            data: {
+                //years
+                labels: [2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017],
+
+                //parsed response
+                datasets:   response
+            },
+
+            options: {
+                scales: {
+                    xAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'YEAR'
+                        }
+                    }],
+                    yAxes:[{
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'EVENT COUNT'
+                        }
+                    }]
+                }
+            }
+
+        });
+        });
+
+
+    // var topCrimesLine =  new Chart( topCrimes, {
+    //     type: 'line',
+    //     data: { },
+    //     options: chartOptions
+    // });
+})();
+
