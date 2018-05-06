@@ -24,10 +24,14 @@ resolvers ++= Seq(
   Resolver.sonatypeRepo("public")
 )
 
+scalaVersion := "2.12.4"
 
-scalaVersion := "2.11.8"
-
-libraryDependencies ++= Seq(guice,
-  "com.github.mauricio" %% "postgresql-async" % "0.2.21",
-  "com.tsukaby" %% "naive-bayes-classifier-scala" % "0.2.0")
+libraryDependencies ++= Seq( guice,
+                             jdbc,
+                             "org.postgresql" % "postgresql" % "42.2.2",
+                             "com.typesafe.play" %% "anorm" % "2.6.0-M1",
+                             "org.playframework.anorm" %% "anorm-postgres" % "2.6.0",
+                             "com.github.mauricio" %% "postgresql-async" % "0.2.21",
+                             "com.tsukaby" %% "naive-bayes-classifier-scala" % "0.2.0",
+                             "nz.ac.waikato.cms.weka" % "weka-stable" % "3.8.0" )
 

@@ -6,38 +6,54 @@ import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.stream.{ActorMaterializer, Materializer, OverflowStrategy}
 import controllers.actors.{ClusteringActor, SocketActor}
 import models.Crime._
-import models.Crime
+import models.{Crime, Location}
 import play.api.Logger
 import play.api.libs.json._
 import play.api.libs.streams.ActorFlow
 import play.api.mvc._
-import services.postgres.DatabaseConnection
-import bayes.Classifier
+import services.postgres.{AnormRepo, DatabaseConnection}
+import bayes.Classifiers
 import com.github.mauricio.async.db.RowData
 
 import scala.concurrent.{ExecutionContext, Future}
 
 
 @Singleton
-class Application @Inject()(cc: ControllerComponents)(postgres: DatabaseConnection, classifier: Classifier)(implicit exec: ExecutionContext)   extends AbstractController(cc) {
+class Application @Inject()(cc: ControllerComponents)(anorm: AnormRepo, postgres: DatabaseConnection, classifier: Classifiers)(implicit exec: ExecutionContext)   extends AbstractController(cc) {
 
   implicit val actorSystem = ActorSystem()
   implicit val actorMaterializer = ActorMaterializer()
+  implicit val crimeWrites = Crime.crimeWrites
 
   val dbOps = postgres.messagesRepository
 
   /** WebSocket handled by actors*/
   def socket = WebSocket.accept[JsValue,JsValue] {_ => ActorFlow.actorRef( { out: ActorRef => SocketActor.props(out, dbOps) }) }
 
-  /** REST controllers */
-  def setPieCharts () = Action.async{ request : (Request[AnyContent]) =>
+  /** Using Anorm */
+  def getAll () = Action.async{ Future { anorm.getAll().map( Json.toJson(_) ) }.map(JsArray(_)).map(Ok(_)) }
 
-    dbOps.selectTotal_Arrests_Domestics()
-         .map( queryResult => queryResult.rows.get.map( row => Json.obj( row(0).asInstanceOf[String] -> JsNumber( row(1).asInstanceOf[Long])) ))
-         .map((jsObjects: IndexedSeq[JsObject]) => Ok(JsArray(jsObjects)) )
+  def clustering(latitude: String, longitude: String, dist: Long, crimeType: String, events: Long) = Action.async{
+    Future {
+      val location = Location(latitude, longitude)
+      Logger.info(s"Searching for cluster near $location of type $crimeType ...")
+      val crimeList = anorm.clusterScan( location, dist, crimeType, events )
+      val size = crimeList.groupBy(_.cluster_id).size;
+      Logger.warn(s" $size cluster[s] found of type $crimeType")
+      crimeList.map(Json.toJson(_))
+    }.map(JsArray(_)).map(Ok(_))
   }
 
-  def setLineCharts (limit :Int) = Action.async{
+
+  /** REST controllers */
+  def setPieChart () = Action.async{ request : (Request[AnyContent]) =>
+
+    dbOps.selectTotal_Arrests_Domestics()
+         .map( queryResult => queryResult.rows.get.map( row =>  row(0).asInstanceOf[String] -> JsNumber( row(1).asInstanceOf[Long]) ))
+         .map(( seq => Ok(JsObject( seq )) ))
+  }
+
+  def setLineChart (limit :Int) = Action.async{
     dbOps.selectTypeSeries()
          .map(queryResult => Json.obj(  "timeseries" ->
            queryResult.rows.get
@@ -69,7 +85,7 @@ class Application @Inject()(cc: ControllerComponents)(postgres: DatabaseConnecti
     Logger.info(s"Checking location $location")
 
     dbOps .checkLocation(location)
-          .map((set) => set.collect{ case Tuple5(t , locDesc, desc, date, id) => Crime(t, desc, locDesc, date, id)})
+          .map((set) => set.collect{ case Tuple5(t , locDesc, desc, date, id) => Crime(t, locDesc, date, id.toLong, description = desc)})
           .map( seq => seq.map(Json.toJson(_)))
           .flatMap(jsObjects => Future { Ok(JsArray(jsObjects)) } )
 
@@ -81,8 +97,8 @@ class Application @Inject()(cc: ControllerComponents)(postgres: DatabaseConnecti
                              .map(jsObjects => { Logger.info("Query succesfull "); Ok(JsArray(jsObjects)) })
   }
 
-  def predict(text: String) = Action.async{ request =>
-    classifier.predict(text : String).map(response  => Ok( response toString ))
+  def predict(crime: String, location:String) = Action.async{ _ =>
+    classifier.predict(crime, location).map(response  => Ok( response.getOrElse( Json.obj("Error" -> JsString("Classifier not ready"))) ))
   }
 
 }

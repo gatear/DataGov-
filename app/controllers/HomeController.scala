@@ -17,7 +17,7 @@ class HomeController @Inject()(cc: ControllerComponents, assetsFinder: AssetsFin
    * a path of `/`.
    */
 
-  def index = Action {
+  def index = Action { implicit request =>
     Ok(views.html.index( assetsFinder ))
   }
 

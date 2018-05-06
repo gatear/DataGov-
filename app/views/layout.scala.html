@@ -33,10 +33,15 @@
             </div>
 
             <section id="GIS" class=" bg-dark text-white">
+                <row>
+                    <div class="col-5">
+                <h2 class="container-title">Proximity Search & Cluster Detection</h2>
+                    </div>
+                </row>
                 <div class="container">
                     <div class="row">
-                        <div class="col-lg-4 mx-auto float-left">
-
+                        <div class="col-2"></div>
+                        <div class="col-4">
                             <div  class="input-group">
 
                                    <input id="long" type="text" class="form-control" placeholder="Location longitude" aria-label="Location longitude">
@@ -59,8 +64,13 @@
                                 Show results <span class="fa fa-database"></span>
                             </button>
                             <div id="input-group" style="padding: 20px 0"></div>
+
+                            <hr class="style">
+
+                            @bar()
+
                         </div>
-                        <div id="chicago" class="col-lg-4 float-right" style="width: 900px; height: 700px"></div>
+                        <div id="chicago" class="col-lg-6" style="width: 700px; height: 703px"></div>
 
                             <!-- Modal -->
                         @searchModal()
@@ -68,28 +78,9 @@
                 </div>
             </section>
 
-            <div id="services" class="bg-light">
-                <div class="col-responsive">
-                    <div class="row">
-                        <div class="card">
-                            <div class="card-header">
-                                Pie Chart #1
-                            </div>
-                        </div>
-                        <div class="card-body">
 
-                        </div>
-                    <div class="card">
-                        <div class="card-header">
-                            Pie Chart #2
-                        </div>
-                    </div>
-                    <div class="card-body">
-
-                    </div>
-                    </div>
-                    </div>
-            </div>
+            <!-- Help Visualise current data -->
+           @dashboard()
 
             <section id="contact" class=" bg-light">
                 <div class="container">
@@ -105,9 +96,26 @@
             <section id="contact">
                 <div class="container">
                     <div class="row">
-                        <div class="col-lg-8 mx-auto">
-                            <h2>Contact us</h2>
-                            <p class="lead">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Vero odio fugiat voluptatem dolor, provident officiis, id iusto! Obcaecati incidunt, qui nihil beatae magnam et repudiandae ipsa exercitationem, in, quo totam.</p>
+                        <div class="col-5">
+                            <h2 class="container-title text-dark">Crime Outcome Prediction</h2>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-5 mx-auto">
+
+                            <div  class="input-group">
+
+                                <input id="type" type="text" class="form-control" placeholder="Crime Type Reported" aria-label="Crime Type">
+                                <input id="place" type="text" class="form-control" placeholder="Location Description" aria-label="Location Description">
+                                <button id="predict" class="btn" style=" border-left-radius: 0px"><span class="fa fa-search"></span> </button>
+
+                            </div>
+
+                            <div id='alert' class="alert alert-info" role="alert">
+                                <h4 class="alert-heading">Reported events</h4>
+                                <p>Based by crime type and location returns the most probable outcome</p>
+                                <p class="mb-0">Given a crime type and a minimal location description it will return if the event will outcome with an arrest and if it is domestic</p>
+                            </div>
                         </div>
                     </div>
                 </div>

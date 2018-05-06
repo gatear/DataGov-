@@ -1,4 +1,10 @@
-@(assetsFinder: AssetsFinder)
+@(assetsFinder: AssetsFinder)(implicit req: play.api.mvc.RequestHeader)
+
+@helper.javascriptRouter("jsRoutes")(
+    routes.javascript.Application.setPieChart,
+    routes.javascript.Application.setLineChart
+)
+
 <html>
 <head>
     <meta charset="utf-8">
@@ -18,7 +24,7 @@
     <link href="@assetsFinder.path("dataTables/css/dataTables.bootstrap4.min.css")" rel="stylesheet">
 
         <!-- Custom CSS-->
-    <link href="@assetsFinder.path("css/scrolling-nav.css")" rel="stylesheet">
+    <link href="@assetsFinder.path("css/custom.css")" rel="stylesheet">
 
 </head>
 <body>
@@ -43,6 +49,7 @@
 
         <!-- ChartJS -->
     <script src="@assetsFinder.path("js/chart.bundle.min.js")"></script>
+    <script src="@assetsFinder.path("js/chart-plugin.js")"></script>
     <script src="@assetsFinder.path("assets/charts.js")"></script>
 
         <!-- DataTablesJS -->
@@ -50,6 +57,57 @@
     <script src="@assetsFinder.path("dataTables/js/dataTables.responsive.js")"></script>
     <script src="@assetsFinder.path("dataTables/js/dataTables.bootstrap4.min.js")"></script>
     <script>
+
+       function random_bg_color() {
+                    let x = Math.floor(Math.random() * 256);
+                    let y = Math.floor(Math.random() * 256);
+                    let z = Math.floor(Math.random() * 256);
+                    let bgColor = "rgb(" + x + "," + y + "," + z + ")";
+
+                    return bgColor;
+                }
+
+        const groupBy = function(xs, key) {
+            return xs.reduce(function(rv, x) {
+                (rv[x[key]] = rv[x[key]] || []).push(x);
+                return rv;
+            }, {});
+        };
+        const bubbleChart = document.querySelector('#bubble-chart').getContext('2d');
+        const bubble = new Chart( bubbleChart, {
+            type: 'horizontalBar',
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        label: "Proximity",
+                        backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9","#c45850"],
+                        data: []
+                    }
+                ]
+            },
+            options: {
+                emptyOverlay : {
+                    enabled : true,
+                    message : 'No Events',
+                },
+                scales: {
+                    yAxes: [{
+                    }],
+                    xAxes: [{
+                        scaleOverride: true,
+                        scaleSteps: 1,
+                        scaleStartValue: 0
+                    }]
+                },
+                legend: { display: false },
+                title: {
+                    display: true,
+                    text: 'Proximity Analysis'
+                }
+            }
+        });
+
                     $(document).ready(function() {
                         var modalTable = $('#modalTable').DataTable( { responsive: true } );
                         var long = $('#long');
@@ -77,7 +135,8 @@
                             }
                         });
 
-                        map.container.click(function(e){
+                        map.container.dblclick(function(e){
+
                             var latLng = map.pointToLatLng(
                                     e.pageX - map.container.offset().left,
                                     e.pageY - map.container.offset().top
@@ -92,6 +151,30 @@
 
                             $.get(searchPath).done(function (data) {
                                 modalTable.clear();
+
+                                console.log(data);
+                                let dataset = (groupBy(data, 'Crime'));
+
+
+                                //For bubble chart
+                                let bubbleData= [];
+                                let labels = [];
+                                let colors = [];
+
+                                for (var k in dataset){
+                                    if (dataset.hasOwnProperty(k)) {
+                                       colors.push(random_bg_color());
+                                       bubbleData.push( dataset[k].length );
+                                       labels.push(k);
+                                    }
+                                };
+
+                                bubble.data.labels = labels;
+                                console.log(bubbleData);
+
+                                bubble.data.datasets = [{ data : bubbleData, backgroundColor: colors, label: 'Proximity update' }];
+                                bubble.update();
+
                                 showResults.prop("disabled",true);
 
                                 data.length != 0 ? input.append('<div class="alert alert-success  alert-dismissible">\n' + ' <button type="button" class="close" data-dismiss="alert" aria-label="Close">\n' +
@@ -114,14 +197,42 @@
                                     showResults.prop("disabled",false);
                                 }
 
-                            })
+                            });
 
                             if (latLng && (!targetCls || (targetCls && $(e.target).attr('class').indexOf('jvectormap-marker') === -1))) {
                                 markersCoords[markerIndex] = latLng;
+                                map.removeAllMarkers();
                                 map.addMarker(markerIndex, {latLng: [latLng.lat, latLng.lng]});
                                 markerIndex += 1;
                             }
                         });
+
+                    $('#predict').click(function () {
+
+                        let type = document.querySelector('#type').value;
+                        let place = document.querySelector('#place').value;
+
+                        console.log("button clicked"+type+place);
+
+                        let path = '/bayes/' + type + '/' + place;
+
+                        console.log(path);
+                        $.get(path).done( function ( data ) {
+
+                        let alert = "<div id=\"alert\" class=\"alert alert-success\" role=\"alert\">"+
+                                    "<h4 class=\"alert-heading\">Prediction Result</h4>"+
+                                    "<p class=\"mb-0\">Arrest : <div class=\"badge badge-outline\">"+ data.arrest +"</div></p>"+
+                                    "<p class=\"mb-0\">Domestic: <div class=\"badge badge-outline\">   "+ data.domestic +"</div> </p>"+
+                                    "</div>";
+
+                        let htmlAlert = $(alert).hide();
+
+                            $('#alert').fadeOut(function(){
+                                $(this).replaceWith( htmlAlert );
+                                $('#alert').fadeIn();
+                            });
+                        });
+                    })
                     } );
 
             </script>

@@ -1,18 +1,16 @@
 (function (){
 
-    var routes = jsRoutes.controllers.Application;
-
-
-    var arrests = document.querySelector('#arrests').getContext('2d');
-    var domestics = document.querySelector('#domestics').getContext('2d');
-    var topCrimes = document.querySelector('#top-crimes').getContext('2d');
+    const routes = jsRoutes.controllers.Application;
+    const arrests = document.querySelector('#arrests').getContext('2d');
+    const domestics = document.querySelector('#domestics').getContext('2d');
+    const topCrimes = document.querySelector('#top-crimes').getContext('2d');
 
 
     var chartOptions = {
         legend: {
             display: true,
             position: 'bottom'
-        },
+        }
 
     };
 
@@ -74,12 +72,14 @@
 
         let colors = ['red','blue','purple','red','orange'];
 
-        let response = data.timeseries.map( object => ({ data:  object.data.map(tuple => tuple.count),
-                                                         label: object.type,
-                                                         borderColor: colors.pop(),
-                                                         fill : false,
-                                                         pointRadius: 6,
-                                                         pointHoverRadius: 7,}) );
+        let response = data.timeseries.map( object => ({
+            data: object.data.map(tuple => tuple.count),
+            label: object.type,
+            borderColor: colors.pop(),
+            fill: false,
+            pointRadius: 6,
+            pointHoverRadius: 7
+        }));
 
         console.log(response);
 
@@ -97,6 +97,11 @@
             },
 
             options: {
+
+                emptyOverlay : {
+                  enabled : true,
+                  message : 'Loading ...',
+                },
                 scales: {
                     xAxes: [{
                         scaleLabel: {
@@ -117,10 +122,5 @@
         });
 
 
-    // var topCrimesLine =  new Chart( topCrimes, {
-    //     type: 'line',
-    //     data: { },
-    //     options: chartOptions
-    // });
 })();
 

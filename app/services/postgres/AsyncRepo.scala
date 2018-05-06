@@ -6,8 +6,8 @@ import play.api.libs.json._
 import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class MessageRepository(pool :Connection) {
-import MessageRepository._
+class AsyncRepo(pool :Connection) {
+import AsyncRepo._
 
   def selectTotal_Arrests_Domestics() =  pool.sendPreparedStatement( total_arrests_domestics )
 
@@ -47,7 +47,7 @@ import MessageRepository._
     result
   }
   def selectDistribution(): Future[IndexedSeq[IndexedSeq[String]]] = {
-    import services.postgres.MessageRepository._
+    import services.postgres.AsyncRepo._
 
     val futureComputation = pool.sendQuery(SelectCrimeDistribution)
 
@@ -64,11 +64,11 @@ import MessageRepository._
           ) }) }
  }
 }
-object MessageRepository {
+object AsyncRepo {
 
   val selectCrimeTypeSeries = "SELECT  \"Primary Type\",year, COUNT(id) FROM crimes_2001_to_2017_chicago GROUP BY \"Primary Type\", year;"
 
-  val total_arrests_domestics = "SELECT 'TOTAL CRIMES' AS cluster, COUNT(arrest) AS number FROM crimes_2001_to_2017_chicago UNION SELECT 'TOTAL ARRESTS'  ,COUNT(arrest)  FROM crimes_2001_to_2017_chicago WHERE crimes_2001_to_2017_chicago.arrest = 'true' UNION SELECT 'TOTAL DOMESTICS', COUNT(crimes_2001_to_2017_chicago.domestic) FROM crimes_2001_to_2017_chicago WHERE  crimes_2001_to_2017_chicago.domestic = 'true';"
+  val total_arrests_domestics = "SELECT 'crimes' AS cluster, COUNT(arrest) AS number FROM crimes_2001_to_2017_chicago UNION SELECT 'arrests'  ,COUNT(arrest)  FROM crimes_2001_to_2017_chicago WHERE crimes_2001_to_2017_chicago.arrest = 'true' UNION SELECT 'domestics', COUNT(crimes_2001_to_2017_chicago.domestic) FROM crimes_2001_to_2017_chicago WHERE  crimes_2001_to_2017_chicago.domestic = 'true';"
 
   val selectClusters = "SELECT * FROM( SELECT id, date, longitude, latitude, st_clusterdbscan(geom, 0.0001, 200) OVER(ORDER BY date DESC) AS cluster_id FROM  (SELECT * FROM crimes_2001_to_2017_chicago WHERE \"Primary Type\"= ? AND st_dwithin( geom::geography, st_geomfromtext($1)::geography, 500)) AS proximityCrimes) AS clusters WHERE cluster_id IS NOT NULL;"
 

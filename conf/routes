@@ -18,10 +18,16 @@ GET     /ws                         controllers.Application.socket
 
 GET     /ws/cluster                 controllers.Application.clusterService
 
-GET    /bayes/:text                 controllers.Application.predict( text :String)
+GET    /bayes/:crime/:location   controllers.Application.predict( crime :String, location:String )
+
+#Anorm based
+GET    /getAll                      controllers.Application.getAll
+
+GET    /services/clustering/long=:longitude/lat=:latitude/dist=:dist/crimeType=:crimeType/events=:events controllers.Application.clustering(longitude: String, latitude: String, dist: Long, crimeType :String, events: Long)
+
 
 ##### Used for overview section
 
-GET /overview/pie-charts             controllers.Application.setPieCharts
+GET /overview/pie-chart             controllers.Application.setPieChart
 
-GET /overview/line-charts/limit=:limit            controllers.Application.setLineCharts(limit : Int)
+GET /overview/line-chart/limit=:limit            controllers.Application.setLineChart(limit : Int)

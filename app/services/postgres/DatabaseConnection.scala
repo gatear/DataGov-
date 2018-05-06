@@ -15,5 +15,5 @@ class DatabaseConnection {
 
   private val pool = new ConnectionPool(factory, PoolConfiguration.Default)
 
-  val messagesRepository = new MessageRepository( pool )
+  val messagesRepository = new AsyncRepo( pool )
 }

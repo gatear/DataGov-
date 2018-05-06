@@ -1,8 +1,4 @@
 
-section {
-    padding: 50px ;
-}
-
 .title {
     position: relative;
     align-content: left;
@@ -10,9 +6,36 @@ section {
     bottom: 500px;
     width: 900px;
 }
+
+hr.style {
+    margin-top: 20px;
+    margin-bottom: 50px;
+    overflow: visible; /* For IE */
+    padding: 0;
+    border: none;
+    border-top: medium double white;
+    color: white;
+    text-align: center;
+}
+
+hr.style:after {
+    content: " AND ";
+    font-weight: 900;
+    background-color: rgb(52, 58, 64);
+    color: white;
+    display: inline-block;
+    position: relative;
+    top: -0.7em;
+    font-size: 1.5em;
+    padding: 0 0.25em;
+}
 .container{
-    padding: 50px 0 0;
+    padding-top: 50px;
     max-width:1920px;
+}
+.row{
+    padding-left: 2vh;
+    padding-bottom: 50px;
 }
 .chart{
     padding: 100px 0 0;
@@ -32,10 +55,38 @@ section {
     padding: 30px;
     margin: 46px;
 }
-
+.container-title {
+    margin-left: 31px;
+    text-transform: uppercase;
+    font-weight: 900;
+    color: #fff3f4;
+    border-style: solid;
+    margin-bottom: 50px;
+    padding-bottom: 5px;
+    text-align: center;
+}
+.input-group{
+    margin-bottom: 20px ;
+}
+.card{
+    box-shadow: 2px 2px 20px #212529!important;
+}
+.card-title{
+    text-transform: uppercase;
+    font-weight: 900;
+    color: #212529;
+    background-color:  white !important;
+    transition: all 0.3s ease-out 0.2s ;
+}
+.card-title:hover{
+    color: white;
+    background-color:  #212529 !important;
+    transition: all 0.3s ease-out 0.2s ;
+}
 .fa-title {
     padding-left: 40px;
 }
+
 
 img {
     vertical-align: middle;

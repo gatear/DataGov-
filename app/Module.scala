@@ -1,8 +1,9 @@
 import com.google.inject.AbstractModule
 import java.time.Clock
 
-import bayes.Classifier
+import bayes.Classifiers
 import play.api.Logger
+import services.postgres.AnormRepo
 
 /**
  * This class is a Guice module that tells Guice how to bind several
@@ -19,7 +20,10 @@ class Module extends AbstractModule {
   override def configure() = {
 
     Logger.info("Binding bayes classifier ...")
-    bind(classOf[Classifier]).asEagerSingleton()
+    bind(classOf[Classifiers]).asEagerSingleton()
+
+    Logger.info("Setting Up Anorm")
+    bind(classOf[AnormRepo]).asEagerSingleton()
 
     // Use the system clock as the default implementation of Clock
     bind(classOf[Clock]).toInstance(Clock.systemDefaultZone)

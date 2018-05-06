@@ -1,0 +1,47 @@
+@()
+
+<section id="dashboard" >
+    <div id="services" class="bg-light">
+        <div class="container" >
+            <row>
+                <div class="col-3">
+                    <h2 class="container-title text-dark">Chicago Overview</h2>
+                </div>
+            </row>
+            <div class="row">
+                <div class="col-sm-3">
+                <div class="card">
+                    <div class="card-header card-title">
+                        Arrests
+                    </div>
+
+                <div class="card-body">
+                    <canvas id="arrests"></canvas>
+
+                </div>
+                </div>
+                <hr>
+                <div class="card">
+                    <div class="card-header card-title">
+                       Domestic Events
+                    </div>
+                <div class="card-body">
+                    <canvas id="domestics"></canvas>
+                </div>
+                </div>
+                </div>
+                <div class = "col-sm-9">
+                    <div class="card">
+                        <div class="card-header card-title">
+Top Crimes - Event count from 2001 to 2017
+                        </div>
+                        <div class="card-body">
+                            <canvas id="top-crimes"  style="width: 1340px; height: 525px">></canvas>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
